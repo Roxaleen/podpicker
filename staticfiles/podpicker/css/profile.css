@@ -1,0 +1,51 @@
+@import "global.css" layer(global);
+
+/* PROFILE PAGES */
+
+/* Page layout */
+
+.site-main {
+    background-color: var(--clr-bg-alt);
+}
+
+/* Profile hero section */
+
+.page-hero {
+    min-height: auto;
+    text-align: center;
+}
+
+.page-hero h1 {
+    margin-bottom: 0;
+}
+
+.page-hero hgroup p {
+    font-size: 0.9rem;
+    text-wrap: balance;
+    margin: 0.5rem 0 0 0;
+}
+
+.profile-link-wrapper {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    gap: 0.5rem 1rem;
+    font-size: 0.9rem;
+    translate: 0 calc(var(--padding-y) + 0.75lh);
+}
+
+.profile-link-wrapper .button {
+    box-shadow: 0 -0.5px 0 0.5px hsl(from currentColor h s l / 0.2);
+}
+
+.profile-link-wrapper .button::before {
+    font-weight: normal;
+    margin-right: 0.125em;
+    translate: -25% 15%;
+}
+
+/* Profile content section */
+
+.profile-content-items {
+    margin-bottom: 3rem;
+}

@@ -1,0 +1,38 @@
+@import "global.css" layer(global);
+
+/* MISCELLANEOUS PAGES - ACCOUNT MANAGEMENT, ERRORS */
+
+/* Page layout */
+
+.site-main {
+    background-color: var(--clr-bg-alt);
+    display: grid;
+    padding: var(--padding-x);
+}
+
+/* Account management forms */
+
+form {
+    width: min(30rem, 100%);
+    text-align: left;
+    margin: auto;
+}
+
+form .error-message {
+    font-weight: bold;
+    color: var(--clr-text-red);
+    margin: 0.5em 0;
+}
+
+/* Errors */
+.error-wrapper {
+    place-self: center;
+
+    width: min(20rem, 100%);
+    text-align: center;
+    text-wrap: balance;
+}
+
+.error-wrapper h1 {
+    margin-bottom: 0.25em;
+}
