@@ -32,4 +32,4 @@ console_command = '/code/manage.py shell'
   destination = '/data'
 
 [processes]
-  app = 'gunicorn project.wsgi:application --bind 0.0.0.0:8080'
+  app = 'gunicorn project.wsgi:application --bind 0.0.0.0:8000'

@@ -27,6 +27,8 @@ DEBUG = False
 
 ALLOWED_HOSTS = ["podpicker.fly.dev"]
 
+CSRF_TRUSTED_ORIGINS = ["https://podpicker.fly.dev"]
+
 
 # Application definition
 
@@ -42,7 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware"
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
