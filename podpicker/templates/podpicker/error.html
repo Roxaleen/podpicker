@@ -1,0 +1,17 @@
+{% extends "podpicker/layout.html" %}
+{% load static %}
+
+{% block css %}
+    {% static 'podpicker/css/admin.css' %}
+{% endblock %}
+
+{% block title %}
+    Error | PodPicker
+{% endblock %}
+
+{% block main %}
+    <div class="error-wrapper">
+        <h1>Error</h1>
+        <p>Something has gone wrong. Please double-check your request.</p>
+    </div>
+{% endblock %}

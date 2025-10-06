@@ -1,0 +1,70 @@
+{% extends "podpicker/layout.html" %}
+{% load static %}
+
+{% block css %}
+    {% static 'podpicker/css/profile.css' %}
+{% endblock %}
+
+{% block title %}
+    {% if list_type == "playlists" %}
+        Your Playlists | PodPicker
+    {% elif list_type == "finished" %}
+        Finished Episodes | PodPicker
+    {% elif list_type == "bookmarked" %}
+        Bookmarked Episodes | PodPicker
+    {% elif list_type == "following" %}
+        Followed Series | PodPicker
+    {% elif list_type == "blocked" %}
+        Blocked Series | PodPicker
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    <section class="page-section page-hero profile-hero" aria-labelledby="profile-hero-heading">
+        {% if list_type == "playlists" %}
+            <hgroup class="profile-hero-heading">
+                <h1 id="profile-hero-heading">Your playlists</h1>
+            </hgroup>
+        {% elif list_type == "finished" %}
+            <hgroup class="profile-hero-heading">
+                <h1 id="profile-hero-heading">Episodes you've completed</h1>
+                <p>These episodes <strong>will not appear in recommendations</strong> for future playlists.</p>
+            </hgroup>
+        {% elif list_type == "bookmarked" %}
+            <hgroup class="profile-hero-heading">
+                <h1 id="profile-hero-heading">Episodes you've bookmarked</h1>
+            </hgroup>
+        {% elif list_type == "following" %}
+            <hgroup class="profile-hero-heading">
+                <h1 id="profile-hero-heading">Series you're following</h1>
+                <p>You can choose to <strong>only include episodes from these series</strong> in the playlist builder.</p>
+            </hgroup>
+        {% elif list_type == "blocked" %}
+            <hgroup class="profile-hero-heading">
+                <h1 id="profile-hero-heading">Series you've blocked</h1>
+                <p>Episodes from these series <strong>will not appear in recommendations</strong> for future playlists.</p>
+            </hgroup>
+        {% endif %}
+
+        <nav class="profile-link-wrapper" aria-label="Profile links">
+            <a class="button{% if list_type == 'playlists' %} button-red{% endif %} icon-before" data-icon="&#xE03D;" href="{% url 'profile' 'playlists' %}">Playlists</a>
+            <a class="button{% if list_type == 'finished' %} button-red{% endif %} icon-before" data-icon="&#xE86C;" href="{% url 'profile' 'finished' %}">Finished</a>
+            <a class="button{% if list_type == 'bookmarked' %} button-red{% endif %} icon-before" data-icon="&#xE866;" href="{% url 'profile' 'bookmarked' %}">Bookmarked</a>
+            <a class="button{% if list_type == 'following' %} button-red{% endif %} icon-before" data-icon="&#xE838;" href="{% url 'profile' 'following' %}">Following</a>
+            <a class="button{% if list_type == 'blocked' %} button-red{% endif %} icon-before" data-icon="&#xE644;" href="{% url 'profile' 'blocked' %}">Blocked</a>
+        </nav>
+    </section>
+
+    <section class="page-section profile-content" aria-label="Profile content list">
+        {% if list_type == "playlists" %}
+            <ul class="profile-content-items playlist-item-list"></ul>
+        {% else %}
+            <ul class="profile-content-items podcast-item-list"></ul>
+        {% endif %}
+    </section>
+{% endblock %}
+
+{% block js %}
+    {{ app_data | json_script:"app-data" }}
+    <script src="{% static 'podpicker/js/profile.js' %}"></script>
+{% endblock %}

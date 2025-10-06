@@ -1,0 +1,170 @@
+@import "global.css" layer(global);
+
+/* PODCAST PICKER FORM PAGE */
+
+/* Picker hero section */
+
+.picker-hero {
+    display: grid;
+    grid-template-areas:
+        "prefix duration"
+        "prefix input"
+        "suffix suffix"
+        "button button"
+        "footer footer";
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    text-align: center;
+}
+
+.picker-hero h1 {
+    display: contents;
+    font-size: clamp(3rem, 2rem + 5vw, 6rem);
+}
+
+.picker-hero-prefix {
+    grid-area: prefix;
+}
+
+.picker-hero-duration {
+    --pointer-left: calc(50% - 0.75rem);
+
+    grid-area: duration;
+    width: 10ch;
+    display: inline-block;
+    font-size: 0.8em;
+    text-align: right;
+    color: var(--clr-text-inverted-alt);
+    border-bottom: 1.5px solid currentColor;
+    border-radius: 0.125em;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.picker-hero-duration::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: clamp(0.25em, var(--pointer-left), calc(100% - 0.25em - 1.5rem));
+    border-top: 0.75rem solid var(--clr-bg-inverted);
+    border-left: 0.75rem solid transparent;
+    border-right: 0.75rem solid transparent;
+    filter: drop-shadow(0 1.5px 0 var(--clr-text-inverted-alt));
+}
+
+.picker-hero-input {
+    grid-area: input;
+    width: calc(10ch * 0.8 - 0.5em);
+    font-family: var(--font-heading);
+    font-size: clamp(3rem, 2rem + 5vw, 6rem);
+    color: var(--clr-text-inverted-alt);
+    accent-color: var(--clr-text-inverted-alt);
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.picker-hero-input:active {
+    accent-color: var(--clr-text-inverted-red);
+}
+
+.picker-hero:has(.picker-hero-input:active) .picker-hero-duration {
+    color: var(--clr-text-inverted-red);
+}
+
+.picker-hero-input:focus-visible {
+    outline: 2px solid hsl(from currentColor h s l / 0.25);
+    outline-offset: 2px;
+}
+
+.picker-hero-suffix {
+    grid-area: suffix;
+    margin-top: 0.125em;
+}
+
+.picker-hero-button {
+    grid-area: button;
+    font-size: clamp(1rem, 0.5rem + 2vw, 1.5rem);
+    border-radius: 0.75em;
+    margin: 2.5em 0 1em;
+}
+
+.picker-hero-button span:last-child {
+    display: block;
+    font-size: 0.8em;
+    font-weight: normal;
+}
+
+.picker-hero-footer {
+    grid-area: footer;
+    color: var(--clr-text-inverted-alt);
+    text-wrap: balance;
+}
+
+.picker-hero-footer::after {
+    margin-left: 0.25em;
+    scale: 1.2 1;
+    translate: 0 20%;
+}
+
+@media (max-width: 21rem) {
+    .picker-hero {
+        grid-template-areas:
+            "prefix"
+            "duration"
+            "input"
+            "suffix"
+            "button"
+            "footer";
+    }
+
+    .picker-hero-suffix {
+        margin-top: 0.75em;
+    }
+}
+
+/* Picker settings section */
+
+.picker-settings {
+    box-shadow: inset 0 0.375rem 0 0 hsl(0 0 0 / 0.125);
+}
+
+.picker-option-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+    align-items: start;
+    gap: 0 1.5rem;
+}
+
+.picker-genre-list {
+    list-style: none;
+    padding: 0;
+}
+
+.picker-genre-list > li:not(:last-child) {
+    margin-bottom: 0.75rem;
+}
+
+.picker-genre-list strong {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.picker-language-list, .picker-genre-list {
+    padding: 0.75rem 0;
+}
+
+.picker-language-selected, .picker-genre-selected {
+    margin-top: 0;
+}
+
+.picker-language-selected:empty::before, .picker-genre-selected:empty::before {
+    content: "None";
+}
+
+.picker-settings .expandable-btn {
+    width: calc(100% + 2.5rem);
+    position: relative;
+    top: 0.75rem;
+    margin: 0 -1.25rem;
+}

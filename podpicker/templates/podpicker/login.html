@@ -1,0 +1,35 @@
+{% extends "podpicker/layout.html" %}
+{% load static %}
+
+{% block css %}
+    {% static 'podpicker/css/admin.css' %}
+{% endblock %}
+
+{% block title %}
+    Log In | PodPicker
+{% endblock %}
+
+{% block main %}
+    <form method="post">
+        {% csrf_token %}
+        <fieldset class="fieldset">
+            <legend>Log into your account</legend>
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+            <div>
+                <p><label class="input-label" for="username">Username</label></p>
+                <p><input class="input-field input-block" type="text" name="username" id="username" autocomplete="off" required></p>
+            </div>
+            <div>
+                <p><label class="input-label" for="password">Password</label></p>
+                <p><input class="input-field input-block" type="password" name="password" id="password" autocomplete="off" required></p>
+            </div>
+            <p>Don't have an account yet? <a class="link" href="{% url 'register' %}">Register</a></p>
+            <button class="button button-red picker-submit-btn" type="submit">Log in</button>
+            {% if error %}
+                <p class="error-message">{{ error }}</p>
+            {% endif %}
+        </fieldset>
+    </form>
+{% endblock %}

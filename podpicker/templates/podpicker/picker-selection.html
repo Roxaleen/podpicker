@@ -1,0 +1,43 @@
+{% extends "podpicker/layout.html" %}
+{% load static %}
+
+{% block css %}
+    {% static 'podpicker/css/picker-selection.css' %}
+{% endblock %}
+
+{% block title %}
+    Your Playlist | PodPicker
+{% endblock %}
+
+{% block main %}
+    <form action="{% url 'create_playlist' %}" method="post">
+        {% csrf_token %}
+        <section class="page-section page-hero picker-hero" aria-labelledby="picker-hero-heading">
+            <hgroup class="picker-hero-heading">
+                <h1 id="picker-hero-heading">Your playlist</h1>
+                <p class="picker-hero-duration">
+                    <span class="icon-before" data-icon="&#xE8B5;">Total duration</span>
+                    <span class="picker-hero-duration-value">00:00</span>
+                </p>
+            </hgroup>
+            <button class="picker-hero-button button button-red" type="submit">Start listening</button>
+            <p class="picker-hero-footer icon-after" data-icon="&#xEAD0;">Or scroll down for more options</p>
+            <ol class="picker-hero-items podcast-item-list"></ol>
+        </section>
+    </form>
+
+    <section class="page-section bg-alt" aria-labelledby="picker-options-heading">
+        <hgroup class="picker-options-heading">
+            <h2 id="picker-options-heading">Additional options</h2>
+            <p>Don't like what we've picked?</p>
+            <p>Take your own pick from the selection below.</p>
+        </hgroup>
+
+        <ul class="picker-options-items podcast-item-list"></ul>
+    </section>
+{% endblock %}
+
+{% block js %}
+    {{ app_data | json_script:"app-data" }}
+    <script src="{% static 'podpicker/js/picker-selection.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}PodPicker{% endblock %}</title>
+        <link rel="stylesheet" href="{% block css %}{% endblock %}">
+    </head>
+
+    <body>
+        <header class="site-header">
+            <nav aria-label="Primary Navigation">
+                <a class="link link-inverted logo" href="/">PodPicker</a>
+                <div class="site-header-account">
+                    {% if user.is_authenticated %}
+                        <span>Hello, <a class="link link-inverted" href="{% url 'profile' 'playlists' %}">{{ user.username }}</a></span>
+                        |
+                        <a class="link link-inverted" href="{% url 'logout' %}">Log out</a>
+                    {% else %}
+                        <a class="link link-inverted" href="{% url 'login' %}">Log in</a>
+                        <a class="link link-inverted" href="{% url 'register' %}">Register</a>
+                    {% endif %}
+                </div>
+            </nav>
+        </header>
+
+        <main class="site-main">
+            {% block main %}{% endblock %}
+        </main>
+
+        <footer class="site-footer">
+            <p>Made with ❤️ by <a class="link link-inverted" href="https://github.com/Roxaleen">Roxaleen</a></p>
+            <p>Powered by <a class="link link-inverted" href="https://taddy.org/developers/podcast-api">Taddy.org</a></p>
+        </footer>
+
+        {% if playlist_action %}
+            <template id="podcast-playlist-template">
+                <li class="playlist-item">
+                    <hgroup class="playlist-item-heading">
+                        <h2 class="playlist-item-title playlist-item-date"></h2>
+                        <p>
+                            <a class="playlist-go-btn podcast-control-btn icon-before" title="Go to player" data-icon="&#xE037;" href="#" target="_blank">
+                                <span class="playlist-item-duration"></span>
+                            </a>
+                        </p>
+                    </hgroup>
+                    <ol class="podcast-item-list"></ol>
+                </li>
+            </template>
+
+            <template id="podcast-item-template">
+                <li class="podcast-item">
+                    <div class="podcast-item-image">
+                        <img src="">
+                        <span class="podcast-item-duration"></span>
+                    </div>
+                    <div class="podcast-item-info">
+                        <p class="podcast-item-title"></p>
+                        <p class="podcast-item-subtitle"></p>
+                    </div>
+                    <div class="podcast-item-controls">
+                        {% if playlist_action == "select" %}
+                            <button class="podcast-add-btn podcast-control-btn icon-before" title="Add to playlist" data-icon="&#xE145;" type="button"></button>
+                            <button class="podcast-remove-btn podcast-control-btn icon-before" title="Remove from playlist" data-icon="&#xE15B;" type="button"></button>
+                        {% elif playlist_action == "play" %}
+                            <button class="podcast-play-btn podcast-control-btn icon-before" title="Play" data-icon="&#xE037;"></button>
+                        {% elif playlist_action == "go" %}
+                            <a class="podcast-go-btn podcast-control-btn icon-before" title="Go to player" data-icon="&#xE037;" href="#" target="_blank"></a>
+                        {% endif %}
+                        <button class="podcast-info-btn podcast-control-btn icon-before" title="View details" data-icon="&#xE8B6;" type="button"></button>
+                    </div>
+                    {% if user.is_authenticated %}
+                        <div class="podcast-item-badges">
+                            <button class="podcast-finish-btn podcast-user-btn icon-after" title="Mark as finished"  data-icon="&#xE86C;" type="button"></button>
+                            <button class="podcast-bookmark-btn podcast-user-btn icon-after" title="Bookmark episode"  data-icon="&#xE866;" type="button"></button>
+                            <button class="podcast-follow-btn podcast-user-btn icon-after" title="Follow series"  data-icon="&#xE838;" type="button"></button>
+                            <button class="podcast-block-btn podcast-user-btn icon-after" title="Block series"  data-icon="&#xE644;" type="button"></button>
+                        </div>
+                    {% endif %}
+                    {% if playlist_action == "select" %}
+                        <input name="uuid" type="hidden" value="">
+                    {% endif %}
+                </li>
+            </template>
+
+            <template id="podcast-dialog-template">
+                <div class="dialog-body">
+                    <div class="dialog-main">
+                        <div class="dialog-main-header">
+                            <div class="dialog-main-image">
+                                <img src="">
+                                <span class="dialog-main-duration"></span>
+                            </div>
+                            <hgroup>
+                                <h3 class="dialog-main-title"></h3>
+                                <p class="dialog-main-type"></p>
+                            </hgroup>
+                        </div>
+                        <ul class="dialog-main-tags tag-cloud"></ul>
+                        <div class="dialog-main-description"></div>
+                    </div>
+                    <div class="dialog-related">
+                        <div class="margin-related-header">
+                            <hgroup>
+                                <h3 class="dialog-related-title"></h3>
+                                <p class="dialog-related-type"></p>
+                            </hgroup>
+                        </div>
+                        <ul class="dialog-related-tags tag-cloud"></ul>
+                        <div class="dialog-related-description"></div>
+                    </div>
+                </div>
+                {% if user.is_authenticated %}
+                    <div class="dialog-footer">
+                        <button class="podcast-finish-btn podcast-user-btn icon-after" data-icon="&#xE86C;">Mark as finished</button>
+                        <button class="podcast-bookmark-btn podcast-user-btn icon-after" data-icon="&#xE866;">Bookmark episode</button>
+                        <button class="podcast-follow-btn podcast-user-btn icon-after" data-icon="&#xE838;">Follow series</button>
+                        <button class="podcast-block-btn podcast-user-btn icon-after" data-icon="&#xE644;">Block series</button>
+                    </div>
+                {% endif %}
+            </template>
+
+            <dialog class="podcast-info-dialog">
+                <button class="dialog-close-btn button button-red icon-after" data-icon="&#xE5CD;" aria-label="Close" autofocus></button>
+                <div class="dialog-content-wrapper"></div>
+            </dialog>
+
+            {% csrf_token %}
+        {% endif %}
+
+        <script src="{% static 'podpicker/js/utils.js' %}"></script>
+        {% block js %}{% endblock %}
+    </body>
+</html>

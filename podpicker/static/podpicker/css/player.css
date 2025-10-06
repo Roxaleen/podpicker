@@ -1,0 +1,27 @@
+@import "global.css" layer(global);
+
+/* PLAYER PAGE */
+
+.page-hero {
+    min-height: 100%;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+}
+
+.page-hero h1 {
+    margin: 0.5em 0;
+}
+
+.player-description {
+    color: var(--clr-text-inverted-alt);
+}
+
+.podcast-item {
+    filter: drop-shadow(0.125rem 0.125rem 0.375rem var(--clr-bg-inverted-alt));
+}
+
+.podcast-item.playing {
+    --podcast-bg-color: var(--clr-bg-purple);
+    --podcast-border-color: var(--clr-text-purple);
+}

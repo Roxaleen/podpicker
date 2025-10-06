@@ -1,0 +1,91 @@
+{% extends "podpicker/layout.html" %}
+{% load static %}
+
+{% block css %}
+    {% static 'podpicker/css/picker-form.css' %}
+{% endblock %}
+
+{% block title %}
+    PodPicker
+{% endblock %}
+
+{% block main %}
+    <form method="post">
+        {% csrf_token %}
+
+        <section class="page-section page-hero picker-hero" aria-label="Hero section">
+            <h1>
+                <span class="picker-hero-prefix">I have</span>
+                <span class="picker-hero-duration">60 minutes</span>
+                <span class="picker-hero-suffix">Make me a playlist!</span>
+            </h1>
+            <input class="picker-hero-input" type="range" name="duration" min="0" max="120" step="5">
+
+            <button class="button button-red picker-hero-button picker-submit-btn" type="submit">
+                Get me some podcasts
+            </button>
+            <p class="picker-hero-footer icon-after" data-icon="&#xEAD0;">Or scroll down for additional settings</p>
+        </section>
+
+        <section class="page-section bg-alt picker-settings" aria-label="Additional settings">
+            <fieldset class="fieldset text-left">
+                <legend>Search options</legend>
+                <div class="picker-option-list">
+                    <div>
+                        <p><label class="input-label" for="picker-term">Keywords</label></p>
+                        <p><input class="input-field input-block" type="text" name="term" id="picker-term" autocomplete="off"></p>
+                    </div>
+                    <div>
+                        <p><label class="input-label" for="picker-date">Publish date</label></p>
+                        <p>
+                            <select class="input-field input-block" name="date" id="picker-date">
+                                <option value="0">Any</option>
+                                <option value="3">Past 3 days</option>
+                                <option value="7">Past 7 days</option>
+                                <option value="14">Past 14 days</option>
+                                <option value="30">Past 30 days</option>
+                            </select>
+                        </p>
+                    </div>
+                    {% if user.is_authenticated %}
+                        <div>
+                            <p><label class="input-label" for="picker-source">Source</label></p>
+                            <p>
+                                <select class="input-field input-block" name="source" id="picker-source">
+                                    <option value="any">Include any podcast series</option>
+                                    <option value="following">Only include podcasts I'm following</option>
+                                </select>
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </fieldset>
+
+            <fieldset class="fieldset text-left">
+                <legend>Languages</legend>
+                <p class="mb-1"><strong>Current selection</strong></p>
+                <ul class="picker-language-selected tag-cloud"></ul>
+                <div class="expandable-wrapper">
+                    <ul class="picker-language-list tag-cloud expandable-content"></ul>
+                </div>
+                <button class="expandable-btn icon-after" type="button" aria-label="Show all options"></button>
+            </fieldset>
+
+            <fieldset class="fieldset text-left">
+                <legend>Genres</legend>
+                <p class="mb-1"><strong>Current selection</strong></p>
+                <ul class="picker-genre-selected tag-cloud"></ul>
+                <div class="expandable-wrapper">
+                    <ul class="picker-genre-list expandable-content"></ul>
+                </div>
+                <button class="expandable-btn icon-after" type="button" aria-label="Show all options"></button>
+            </fieldset>
+
+            <button class="button button-red picker-submit-btn" type="submit">Search podcasts</button>
+        </section>
+    </form>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'podpicker/js/picker-form.js' %}"></script>
+{% endblock %}

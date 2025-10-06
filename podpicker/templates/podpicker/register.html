@@ -1,0 +1,36 @@
+{% extends "podpicker/layout.html" %}
+{% load static %}
+
+{% block css %}
+    {% static 'podpicker/css/admin.css' %}
+{% endblock %}
+
+{% block title %}
+    Register | PodPicker
+{% endblock %}
+
+{% block main %}
+    <form method="post">
+        {% csrf_token %}
+        <fieldset class="fieldset">
+            <legend>Create an account</legend>
+            <div>
+                <p><label class="input-label" for="username">Username</label></p>
+                <p><input class="input-field input-block" type="text" name="username" id="username" autocomplete="off" required></p>
+            </div>
+            <div>
+                <p><label class="input-label" for="password">Password</label></p>
+                <p><input class="input-field input-block" type="password" name="password" id="password" autocomplete="off" required></p>
+            </div>
+            <div>
+                <p><label class="input-label" for="password-confirm">Confirm password</label></p>
+                <p><input class="input-field input-block" type="password" name="password-confirm" id="password-confirm" autocomplete="off" required></p>
+            </div>
+            <p>Already have an account? <a class="link" href="{% url 'login' %}">Log in</a></p>
+            <button class="button button-red picker-submit-btn" type="submit">Register</button>
+            {% if error %}
+                <p class="error-message">{{ error }}</p>
+            {% endif %}
+        </fieldset>
+    </form>
+{% endblock %}
