@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for podpicker on 2025-10-06T12:36:47Z
+# fly.toml app configuration file generated for podpicker on 2025-10-06T13:13:07Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -28,5 +28,5 @@ console_command = '/code/manage.py shell'
   url_prefix = '/static/'
 
 [mounts]
-source = "data"
-destination = "/data"
+  source = 'data'
+  destination = '/data'

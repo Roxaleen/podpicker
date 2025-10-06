@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-nv!25e#d_*f!iki8qb3&n$oa723l=as4@nu=1ho%lps&6$=3em"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["podpicker.fly.dev"]
+ALLOWED_HOSTS = ["podpicker.fly.dev", "*"]
 
 
 # Application definition
