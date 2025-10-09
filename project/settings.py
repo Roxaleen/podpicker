@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-nv!25e#d_*f!iki8qb3&n$oa723l=as4@nu=1ho%lps&6$=3em"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get("DEBUG", True)
 
-ALLOWED_HOSTS = ["podpicker.fly.dev"]
+ALLOWED_HOSTS = ["podpicker.fly.dev", "localhost"]
 
 CSRF_TRUSTED_ORIGINS = ["https://podpicker.fly.dev"]
 
@@ -78,12 +78,12 @@ WSGI_APPLICATION = "project.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 # Use an environment variable for the database path, with a fallback for local development.
-DATABASE_PATH = os.environ.get('DATABASE_PATH', BASE_DIR / 'data/db.sqlite3')
+DATABASE_PATH = os.environ.get("DATABASE_PATH", BASE_DIR / "data/db.sqlite3")
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DATABASE_PATH,
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": DATABASE_PATH,
     }
 }
 

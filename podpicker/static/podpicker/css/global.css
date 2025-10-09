@@ -179,7 +179,7 @@ img {
 body {
     --header-height: 3lh;
 
-    min-height: 100dvh;
+    min-height: 100lvh;
     display: grid;
     grid-template-rows: auto 1fr auto;
     background-color: var(--clr-bg);
@@ -235,7 +235,7 @@ body {
 }
 
 .page-hero {
-    min-height: calc(100dvh - var(--header-height));
+    min-height: calc(100lvh - var(--header-height));
     color: var(--clr-text-inverted);
     background-color: var(--clr-bg-inverted);
     background-image: linear-gradient(0deg, hsl(from var(--clr-bg-inverted-bevel) h s l / 0.75), transparent 40%);
@@ -370,7 +370,6 @@ input {
     background-color: var(--clr-bg-inverted-red);
     border-radius: 0.5em;
     padding: 0.25em 0.75em;
-    translate: 0 10%;
 }
 
 p:has(.input-label) {
@@ -660,7 +659,7 @@ p:has(.input-label) {
 
 .podcast-info-dialog {
     width: min(60rem, calc(100vw - 2 * var(--padding-x)));
-    height: 90dvh;
+    height: 90vh;
     color: var(--clr-text);
     background-color: var(--clr-bg);
     border: 0.125rem solid var(--clr-text-alt);
@@ -713,7 +712,7 @@ p:has(.input-label) {
 
 @media (min-width: 45rem) {
     .podcast-info-dialog {
-        height: 80dvh;
+        height: 80vh;
     }
 
     .dialog-body {
