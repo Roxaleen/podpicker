@@ -30,6 +30,3 @@ console_command = '/code/manage.py shell'
 [mounts]
   source = 'data'
   destination = '/data'
-
-[processes]
-  app = 'gunicorn project.wsgi:application --bind 0.0.0.0:8000'
