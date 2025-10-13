@@ -28,6 +28,12 @@
         </section>
 
         <section class="page-section bg-alt picker-settings" aria-label="Additional settings">
+            {% if not user.is_authenticated %}
+                <div class="fieldset">
+                    <p class="legend">Tip</p>
+                    <p><a href="{% url 'register' %}" class="link">Create an account</a> or <a href="{% url 'login' %}" class="link">log in</a> for more customization and history filters!</p>
+                </div>
+            {% endif %}
             <fieldset class="fieldset text-left">
                 <legend>Search options</legend>
                 <div class="picker-option-list">
