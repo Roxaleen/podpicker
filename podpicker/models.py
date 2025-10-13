@@ -82,7 +82,7 @@ class PodcastEpisode(models.Model):
             "duration": self.duration,
             "imageUrl": self.imageUrl,
             "audioUrl": self.audioUrl,
-            "published": self.published.timestamp(),
+            "published": None if self.published is None else self.published.timestamp(),
             "podcastSeries": self.series.get_metadata(user)
         }
 
