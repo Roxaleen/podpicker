@@ -67,6 +67,7 @@ class PodcastEpisode(models.Model):
     duration = models.IntegerField()
     imageUrl = models.URLField(null=True)
     audioUrl = models.URLField()
+    published = models.DateTimeField(null=True)
     series = models.ForeignKey(PodcastSeries, on_delete=models.PROTECT, related_name="episodes")
 
     def __str__(self):
@@ -81,6 +82,7 @@ class PodcastEpisode(models.Model):
             "duration": self.duration,
             "imageUrl": self.imageUrl,
             "audioUrl": self.audioUrl,
+            "published": self.published.timestamp(),
             "podcastSeries": self.series.get_metadata(user)
         }
 

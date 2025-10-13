@@ -781,7 +781,7 @@ p:has(.input-label) {
     margin-bottom: 0;
 }
 
-.dialog-main-type, .dialog-related-type {
+.dialog-main-type, .dialog-main-date, .dialog-related-type {
     font-size: 0.9rem;
     opacity: 0.75;
     margin-bottom: 0;

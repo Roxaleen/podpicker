@@ -1,5 +1,7 @@
 import os, random, requests, time
 
+from datetime import datetime
+
 from .models import PodcastSeries, PodcastEpisode, Playlist
 
 
@@ -46,6 +48,7 @@ def get_podcasts(request, duration, page):
                     imageUrl,
                     audioUrl,
                     episodeType,
+                    datePublished,
                     podcastSeries {
                         uuid,
                         hash,
@@ -142,6 +145,7 @@ def get_podcasts(request, duration, page):
                 "duration": episode["duration"],
                 "imageUrl": episode["imageUrl"],
                 "audioUrl": episode["audioUrl"],
+                "published": datetime.fromtimestamp(episode["datePublished"]),
                 "series": series
             }
         )

@@ -353,6 +353,14 @@
             this.imageUrl = metadata.imageUrl == null ? metadata.podcastSeries.imageUrl : metadata.imageUrl;
             this.audioUrl = metadata.audioUrl;
 
+            // Format publish date (if any)
+            const dateFormatter = new Intl.DateTimeFormat('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+            if (metadata.published) this.published = dateFormatter.format(new Date(metadata.published * 1000));
+
             // Retrieve user interaction state
             if (window.isUserAuthenticated) {
                 this.isFinished = metadata.isFinished;
@@ -459,6 +467,11 @@
             templateClone.querySelector('.dialog-main-title').textContent = this.title;
             templateClone.querySelector('.dialog-main-description').innerHTML = this.description;
             templateClone.querySelector('.dialog-main-tags').remove();
+            if (this.published) {
+                templateClone.querySelector('.dialog-main-date').textContent = this.published;
+            } else {
+                templateClone.querySelector('.dialog-main-date').remove();
+            }
 
             // Populate series metadata
             templateClone.querySelector('.dialog-related-type').textContent = 'Series';
