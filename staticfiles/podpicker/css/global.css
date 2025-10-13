@@ -361,15 +361,25 @@ input {
     border-radius: 0.5rem;
     padding: 0.75rem 1.25rem;
     margin: 0 0 1.25rem 0;
-    overflow: hidden;
 }
 
-.fieldset legend {
+.fieldset:not(fieldset) {
+    padding-top: 1.25lh;
+    margin-top: 0.75lh;
+    position: relative;
+}
+
+.fieldset legend, .fieldset .legend {
     font-weight: bold;
     color: var(--clr-text-inverted);
     background-color: var(--clr-bg-inverted-red);
     border-radius: 0.5em;
     padding: 0.25em 0.75em;
+}
+
+.legend {
+    position: absolute;
+    top: -0.75lh;
 }
 
 p:has(.input-label) {

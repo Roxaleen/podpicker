@@ -166,5 +166,6 @@
     width: calc(100% + 2.5rem);
     position: relative;
     top: 0.75rem;
+    color: inherit;
     margin: 0 -1.25rem;
 }
