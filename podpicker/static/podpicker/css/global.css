@@ -661,6 +661,22 @@ p:has(.input-label) {
     font-variation-settings: "FILL" 1, "opsz" 30;
 }
 
+.podcast-user-btn:disabled {
+    pointer-events: none;
+}
+
+.podcast-user-btn:disabled::after {
+    content: "\e9d0";
+    opacity: 0.5;
+    animation: spin 2500ms linear infinite forwards;
+}
+
+@keyframes spin {
+    to {
+        rotate: 360deg;
+    }
+}
+
 .podcast-block-btn {
     --btn-active-color: var(--clr-text-red);
 }
