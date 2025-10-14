@@ -179,7 +179,7 @@ img {
 body {
     --header-height: 3lh;
 
-    min-height: 100lvh;
+    min-height: 100dvh;
     display: grid;
     grid-template-rows: auto 1fr auto;
     background-color: var(--clr-bg);
@@ -235,7 +235,7 @@ body {
 }
 
 .page-hero {
-    min-height: calc(100lvh - var(--header-height));
+    min-height: calc(100svh - var(--header-height));
     color: var(--clr-text-inverted);
     background-color: var(--clr-bg-inverted);
     background-image: linear-gradient(0deg, hsl(from var(--clr-bg-inverted-bevel) h s l / 0.75), transparent 40%);
