@@ -1,4 +1,5 @@
 Django
 gunicorn
+nh3
 requests
 whitenoise

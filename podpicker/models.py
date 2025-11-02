@@ -30,7 +30,7 @@ class PodcastSeries(models.Model):
     hash = models.CharField()
     title = models.CharField()
     description = models.TextField()
-    imageUrl = models.URLField()
+    imageUrl = models.URLField(null=True)
     language = models.CharField()
     genres = models.JSONField(default=list)
 

@@ -31,7 +31,8 @@ def view_picker(request):
             if new_data is None:
                 return render(request, "podpicker/error.html")
             # If request successful, add data to data list
-            podcast_data.extend(new_data)
+            unique_uuids = set()
+            podcast_data = [episode for episode in podcast_data + new_data if episode["uuid"] not in unique_uuids and not unique_uuids.add(episode["uuid"])]
 
         # Create recommended playlist
         playlist_data, extra_data = pick_podcasts(podcast_data, duration)

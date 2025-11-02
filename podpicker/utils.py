@@ -1,8 +1,23 @@
-import os, random, requests, time
+import nh3, os, random, requests, time
 
 from datetime import datetime
 
 from .models import PodcastSeries, PodcastEpisode, Playlist
+
+
+# HTML sanitizer
+# Documentation: https://nh3.readthedocs.io/
+nh3_cleaner = nh3.Cleaner(
+    tags=set(["p", "br", "hr", "strong", "em", "b", "i", "u", "a"]),
+    attributes={
+        "a": set(["href"])
+    },
+    set_tag_attribute_values={
+        "a": {
+            "target": "_blank"
+        }
+    }
+)
 
 
 def get_podcasts(request, duration, page):
@@ -21,6 +36,7 @@ def get_podcasts(request, duration, page):
             $date_earliest: Int,
             $duration_max: Int!,
             $duration_min: Int!,
+            $sort: SearchSortOrder,
             $page: Int = 1
         ) {
             search(
@@ -34,7 +50,7 @@ def get_podcasts(request, duration, page):
                 filterForPublishedAfter: $date_earliest,
                 filterForDurationLessThan: $duration_max,
                 filterForDurationGreaterThan: $duration_min,
-                sortBy: POPULARITY,
+                sortBy: $sort,
                 limitPerPage: 25,
                 page: $page
             ){
@@ -70,6 +86,7 @@ def get_podcasts(request, duration, page):
         "genres": request.POST.getlist("genre"),
         "duration_max": duration * 60 / 2, # Find episodes of up to 1/2 the desired playlist duration
         "duration_min": duration * 60 / 6, # Find episodes of at least 1/6 the desired playlist duration
+        "sort": "EXACTNESS" if request.POST.get("term") else "POPULARITY",
         "page": page
     }
 
@@ -130,7 +147,7 @@ def get_podcasts(request, duration, page):
             defaults={
                 "hash": episode["podcastSeries"]["hash"],
                 "title": episode["podcastSeries"]["name"],
-                "description": episode["podcastSeries"]["description"],
+                "description": nh3_cleaner.clean(episode["podcastSeries"]["description"]) if episode["podcastSeries"]["description"] else "",
                 "imageUrl": episode["podcastSeries"]["imageUrl"],
                 "language": episode["podcastSeries"]["language"],
                 "genres": episode["podcastSeries"]["genres"]
@@ -141,7 +158,7 @@ def get_podcasts(request, duration, page):
             defaults={
                 "hash": episode["hash"],
                 "title": episode["name"],
-                "description": episode["description"],
+                "description": nh3_cleaner.clean(episode["description"]) if episode["description"] else "",
                 "duration": episode["duration"],
                 "imageUrl": episode["imageUrl"],
                 "audioUrl": episode["audioUrl"],
