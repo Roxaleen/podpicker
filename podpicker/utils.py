@@ -5,6 +5,10 @@ from datetime import datetime
 from .models import PodcastSeries, PodcastEpisode, Playlist
 
 
+# Max number of results per API call
+API_PAGE_LIMIT = 25
+
+
 # HTML sanitizer
 # Documentation: https://nh3.readthedocs.io/
 nh3_cleaner = nh3.Cleaner(
@@ -37,6 +41,7 @@ def get_podcasts(request, duration, page):
             $duration_max: Int!,
             $duration_min: Int!,
             $sort: SearchSortOrder,
+            $results_per_page: Int,
             $page: Int = 1
         ) {
             search(
@@ -51,7 +56,7 @@ def get_podcasts(request, duration, page):
                 filterForDurationLessThan: $duration_max,
                 filterForDurationGreaterThan: $duration_min,
                 sortBy: $sort,
-                limitPerPage: 25,
+                limitPerPage: $results_per_page,
                 page: $page
             ){
                 searchId
@@ -87,6 +92,7 @@ def get_podcasts(request, duration, page):
         "duration_max": duration * 60 / 2, # Find episodes of up to 1/2 the desired playlist duration
         "duration_min": duration * 60 / 6, # Find episodes of at least 1/6 the desired playlist duration
         "sort": "EXACTNESS" if request.POST.get("term") else "POPULARITY",
+        "results_per_page": API_PAGE_LIMIT,
         "page": page
     }
 
@@ -100,12 +106,19 @@ def get_podcasts(request, duration, page):
 
     # User-specific series filters (logged-in users only)
     if request.user.is_authenticated:
-        # If searching for any podcasts
-        if request.POST.get("source") == "any":
-            variables["series_exclude"] = [str(uuid) for uuid in request.user.blocked_series.values_list("uuid", flat=True)]
+        # Exclude blocked podcasts
+        exclude_series = {str(uuid) for uuid in request.user.blocked_series.values_list("uuid", flat=True)}
+        variables["series_exclude"] = list(exclude_series)
+        
         # If searching for followed podcasts only
-        elif request.POST.get("source") == "following":
-            variables["series"] = [str(uuid) for uuid in request.user.followed_series.values_list("uuid", flat=True)]
+        if request.POST.get("source") == "following":
+            include_series = {str(uuid) for uuid in request.user.followed_series.values_list("uuid", flat=True)}
+            variables["series"] = list(include_series - exclude_series)
+        
+        # If searching for previously listened podcasts only
+        if request.POST.get("source") == "history":
+            include_series = request.user.get_finished_series()
+            variables["series"] = list(include_series - exclude_series)
 
     # Send request
     response = requests.post(

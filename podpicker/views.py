@@ -25,14 +25,23 @@ def view_picker(request):
         # Search podcasts
         page = 1
         podcast_data = []
+        unique_uuids = set()
+
         while page <= 10 and len(podcast_data) < 10:
             new_data = get_podcasts(request, duration, page)
+            has_next = False if len(new_data) < API_PAGE_LIMIT else True
+
             # If request unsuccessful, display error page
             if new_data is None:
                 return render(request, "podpicker/error.html")
-            # If request successful, add data to data list
-            unique_uuids = set()
-            podcast_data = [episode for episode in podcast_data + new_data if episode["uuid"] not in unique_uuids and not unique_uuids.add(episode["uuid"])]
+            
+            # If request successful, filter data for duplicates
+            new_data = [episode for episode in new_data if episode["uuid"] not in unique_uuids and not unique_uuids.add(episode["uuid"])]
+            podcast_data.extend(new_data)
+
+            # If there are no more non-duplicate results, exit loop
+            if len(new_data) == 0 or not has_next:
+                break
 
         # Create recommended playlist
         playlist_data, extra_data = pick_podcasts(podcast_data, duration)

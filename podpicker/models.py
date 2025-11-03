@@ -24,6 +24,9 @@ class User(AbstractUser):
     def get_blocked(self):
         return [rel.podcastseries.get_metadata(self) for rel in User.blocked_series.through.objects.filter(user=self).order_by("-id")]
 
+    def get_finished_series(self):
+        return {str(rel.podcastepisode.series.uuid) for rel in User.finished_episodes.through.objects.filter(user=self).order_by("-id")}
+
 
 class PodcastSeries(models.Model):
     uuid = models.UUIDField(primary_key=True, editable=False)
