@@ -86,15 +86,23 @@ def get_podcasts(request, duration, page):
 
     # Construct variable list
     variables = {
-        "term": request.POST.get("term"),
         "languages": request.POST.getlist("language"),
         "genres": request.POST.getlist("genre"),
         "duration_max": duration * 60 / 2, # Find episodes of up to 1/2 the desired playlist duration
         "duration_min": duration * 60 / 6, # Find episodes of at least 1/6 the desired playlist duration
-        "sort": "EXACTNESS" if request.POST.get("term") else "POPULARITY",
         "results_per_page": API_PAGE_LIMIT,
         "page": page
     }
+
+    # Set search term
+    if request.POST.get("term"):
+        variables["term"] = request.POST.get("term")
+    elif request.POST.getlist("genre"):
+        # If no search terms have been entered, use genre selection
+        variables["term"] = " ".join({word for genre in request.POST.getlist("genre") for word in genre.lower().split("_")} - {"podcastseries"})
+    
+    # Set sort order
+    variables["sort"] = "EXACTNESS" if "term" in variables else "POPULARITY"
 
     # Compute publish date cut-off (as epoch time in seconds)
     try:
