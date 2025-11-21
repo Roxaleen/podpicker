@@ -50,6 +50,7 @@ def get_podcasts(request):
     page = 1
     podcast_data = []
     unique_uuids = set()
+    rankings = {}
 
     while page <= 10 and len(podcast_data) < 10:
         variables["page"] = page
@@ -69,22 +70,29 @@ def get_podcasts(request):
                 }
             )
             raw_list = response.json()["data"]["search"]["podcastEpisodes"]
+            ranking_list = response.json()["data"]["search"]["rankingDetails"]
+            rankings.update({episode["uuid"] : episode["rankingScore"] for episode in ranking_list})
         except:
             return {"error": {
                 "error_heading": "Connection failed",
                 "error_body": "An error occurred in connecting to the podcast service. Please try again later."
             }}
 
-        new_data = process_raw_data(request, raw_list)
-        has_next = False if len(new_data) < API_PAGE_LIMIT else True
-
         # Filter data for duplicates
-        new_data = [episode for episode in new_data if episode["uuid"] not in unique_uuids and not unique_uuids.add(episode["uuid"])]
+        raw_list = [episode for episode in raw_list if episode["uuid"] not in unique_uuids and not unique_uuids.add(episode["uuid"])]
+        
+        # Process received data
+        new_data = process_raw_data(request, raw_list)
         podcast_data.extend(new_data)
 
         # If there are no more non-duplicate results, exit loop
+        has_next = False if len(new_data) < API_PAGE_LIMIT else True
         if len(new_data) == 0 or not has_next:
             break
+    
+    # Insert search rankings
+    for episode in podcast_data:
+        episode["ranking"] = rankings[str(episode["uuid"])]
 
     # Process received data
     return {
@@ -148,6 +156,11 @@ def construct_api_query(request, duration):
                         language
                     }
                 }
+                rankingDetails {
+                    id
+                    uuid
+                    rankingScore
+                }
             }
         }
         """
@@ -156,8 +169,8 @@ def construct_api_query(request, duration):
     variables = {
         "languages": request.POST.getlist("language"),
         "genres": request.POST.getlist("genre"),
-        "duration_max": duration * 60 / DURATION_DIVISOR_MIN,
-        "duration_min": duration * 60 / DURATION_DIVISOR_MAX,
+        "duration_max": duration * 60 // DURATION_DIVISOR_MIN,
+        "duration_min": duration * 60 // DURATION_DIVISOR_MAX,
         "results_per_page": API_PAGE_LIMIT
     }
 
