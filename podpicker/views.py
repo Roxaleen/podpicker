@@ -59,7 +59,7 @@ def view_create_playlist(request):
 
     # Set playlist content
     for uuid in episodes_uuids:
-        playlist.episodes.add(PodcastEpisode.objects.filter(uuid=uuid))
+        playlist.episodes.add(PodcastEpisode.objects.get(uuid=uuid))
 
     return redirect("player", item_type="playlist", item_id=str(playlist.id))
 
