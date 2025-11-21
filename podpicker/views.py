@@ -6,7 +6,8 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 
 from .models import *
-from .utils import *
+from .podcasts import *
+from .playlists import *
 
 
 def view_picker(request):
@@ -15,36 +16,13 @@ def view_picker(request):
     """
     # If method is POST (user submitted podcast search form)
     if request.method == "POST":
-        # Extract form input
-        try:
-            duration = int(request.POST["duration"])
-        except:
-            # If input invalid, display error page
-            return render(request, "podpicker/error.html")
-
         # Search podcasts
-        page = 1
-        podcast_data = []
-        unique_uuids = set()
-
-        while page <= 10 and len(podcast_data) < 10:
-            new_data = get_podcasts(request, duration, page)
-            has_next = False if len(new_data) < API_PAGE_LIMIT else True
-
-            # If request unsuccessful, display error page
-            if new_data is None:
-                return render(request, "podpicker/error.html")
-            
-            # If request successful, filter data for duplicates
-            new_data = [episode for episode in new_data if episode["uuid"] not in unique_uuids and not unique_uuids.add(episode["uuid"])]
-            podcast_data.extend(new_data)
-
-            # If there are no more non-duplicate results, exit loop
-            if len(new_data) == 0 or not has_next:
-                break
-
+        data = get_podcasts(request)
+        if "error" in data:
+            return render(request, "podpicker/error.html", data["error"])
+        
         # Create recommended playlist
-        playlist_data, extra_data = pick_podcasts(podcast_data, duration)
+        (playlist_data, extra_data) = build_playlist(data["data"], data["duration"])
 
         # Render result page
         return render(request, "podpicker/picker-selection.html", {
@@ -75,12 +53,13 @@ def view_create_playlist(request):
 
     # Create new playlist
     playlist = Playlist.objects.create(
-        user=request.user if request.user.is_authenticated else None,
+        user = request.user if request.user.is_authenticated else None,
         session = None if request.user.is_authenticated else request.session.session_key
     )
 
     # Set playlist content
-    playlist.episodes.set(PodcastEpisode.objects.filter(uuid__in=episodes_uuids))
+    for uuid in episodes_uuids:
+        playlist.episodes.add(PodcastEpisode.objects.filter(uuid=uuid))
 
     return redirect("player", item_type="playlist", item_id=str(playlist.id))
 

@@ -11,7 +11,19 @@
 
 {% block main %}
     <div class="error-wrapper">
-        <h1>Error</h1>
-        <p>Something has gone wrong. Please double-check your request.</p>
+        <h1>
+            {% if error_heading %}
+                {{ error_heading }}
+            {% else %}
+                Error
+            {% endif %}
+        </h1>
+        <p>
+            {% if error_body %}
+                {{ error_body }}
+            {% else %}
+                Something has gone wrong. Please double-check your request.
+            {% endif %}
+        </p>
     </div>
 {% endblock %}

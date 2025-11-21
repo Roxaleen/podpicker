@@ -1,12 +1,16 @@
-import nh3, os, random, requests, time
+import nh3, os, requests, time
 
 from datetime import datetime
 
-from .models import PodcastSeries, PodcastEpisode, Playlist
+from .models import PodcastSeries, PodcastEpisode
 
 
 # Max number of results per API call
 API_PAGE_LIMIT = 25
+
+# Min & max duration divisors
+DURATION_DIVISOR_MIN = 2 # Find episodes of up to 1/2 the desired playlist duration
+DURATION_DIVISOR_MAX = 6 # Find episodes of at least 1/6 the desired playlist duration
 
 
 # HTML sanitizer
@@ -24,10 +28,74 @@ nh3_cleaner = nh3.Cleaner(
 )
 
 
-def get_podcasts(request, duration, page):
+def get_podcasts(request):
     """
     Query Taddy Podcast API for suitable podcast episodes
-    Returns a list of podcast episodes if successful, else None
+    Returns a dict containing:
+    - If successful, a `data` key with a list of podcast episodes
+    - If unsuccessful, an `error` key with error information
+    """
+    # Construct API query
+    try:
+        duration = int(request.POST["duration"])
+        (query, variables) = construct_api_query(request, duration)
+    except:
+        return {"error": {
+            "error_heading": "Invalid request",
+            "error_body": "Your query couldn't be processed. Please double-check and try again."
+        }}
+
+    # Send API query
+    # Repeatedly query for more pages until at least 10 suitable episodes are found 
+    page = 1
+    podcast_data = []
+    unique_uuids = set()
+
+    while page <= 10 and len(podcast_data) < 10:
+        variables["page"] = page
+
+        # Send request
+        try:
+            response = requests.post(
+                "https://api.taddy.org",
+                json={
+                    "query": query,
+                    "variables": variables
+                },
+                headers={
+                    "Content-Type": "application/json",
+                    "X-USER-ID": os.getenv("X_USER_ID"),
+                    "X-API-KEY": os.getenv("X_API_KEY")
+                }
+            )
+            raw_list = response.json()["data"]["search"]["podcastEpisodes"]
+        except:
+            return {"error": {
+                "error_heading": "Connection failed",
+                "error_body": "An error occurred in connecting to the podcast service. Please try again later."
+            }}
+
+        new_data = process_raw_data(request, raw_list)
+        has_next = False if len(new_data) < API_PAGE_LIMIT else True
+
+        # Filter data for duplicates
+        new_data = [episode for episode in new_data if episode["uuid"] not in unique_uuids and not unique_uuids.add(episode["uuid"])]
+        podcast_data.extend(new_data)
+
+        # If there are no more non-duplicate results, exit loop
+        if len(new_data) == 0 or not has_next:
+            break
+
+    # Process received data
+    return {
+        "data": podcast_data,
+        "duration": duration
+        }
+
+
+def construct_api_query(request, duration):
+    """
+    Construct GraphQL query for Taddy API based on submitted form input
     """
     # Construct GraphQL query
     query = """
@@ -88,10 +156,9 @@ def get_podcasts(request, duration, page):
     variables = {
         "languages": request.POST.getlist("language"),
         "genres": request.POST.getlist("genre"),
-        "duration_max": duration * 60 / 2, # Find episodes of up to 1/2 the desired playlist duration
-        "duration_min": duration * 60 / 6, # Find episodes of at least 1/6 the desired playlist duration
-        "results_per_page": API_PAGE_LIMIT,
-        "page": page
+        "duration_max": duration * 60 / DURATION_DIVISOR_MIN,
+        "duration_min": duration * 60 / DURATION_DIVISOR_MAX,
+        "results_per_page": API_PAGE_LIMIT
     }
 
     # Set search term
@@ -127,35 +194,20 @@ def get_podcasts(request, duration, page):
         if request.POST.get("source") == "history":
             include_series = request.user.get_finished_series()
             variables["series"] = list(include_series - exclude_series)
+    
+    return query, variables
 
-    # Send request
-    response = requests.post(
-        "https://api.taddy.org",
-        json={
-            "query": query,
-            "variables": variables
-        },
-        headers={
-            "Content-Type": "application/json",
-            "X-USER-ID": os.getenv("X_USER_ID"),
-            "X-API-KEY": os.getenv("X_API_KEY")
-        }
-    )
 
-    # Check response
-    if response.status_code != 200:
-        return None
-    try:
-        raw_list = response.json()["data"]["search"]["podcastEpisodes"]
-    except:
-        return None
+def process_raw_data(request, raw_list):
+    """
+    Process raw podcast data received from the API.
+    """
+    processed_list = []
 
-    # Process received data
+    # Check episode validity
     # - Discard episodes with no audio URL
     # - Discard episodes whose episodeType is not "FULL"
     # - Discard already finished episodes (logged-in users only)
-    processed_list = []
-
     for episode in raw_list:
         if episode["audioUrl"] is None or episode["episodeType"] != "FULL":
             raw_list.remove(episode)
@@ -190,29 +242,3 @@ def get_podcasts(request, duration, page):
         processed_list.append(episode.get_metadata(request.user))
 
     return processed_list
-
-
-def pick_podcasts(podcast_data, duration):
-    """
-    Generate podcast playlist with specified maximum duration
-    """
-    # Convert minutes to seconds
-    duration = duration * 60
-
-    # Copy podcast data into new list
-    extra_data = podcast_data.copy()
-
-    # Randomly shuffle podcast list
-    random.shuffle(extra_data)
-
-    # Keep moving items from podcast list to playlist until maximum duration is reached
-    playlist_data = []
-    for playlist_item in extra_data:
-        if playlist_item["duration"] < duration:
-            extra_data.remove(playlist_item)
-            playlist_data.append(playlist_item)
-            duration -= playlist_item["duration"]
-        if duration < 0:
-            break
-
-    return playlist_data, extra_data
