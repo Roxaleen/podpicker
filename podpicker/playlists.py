@@ -65,25 +65,18 @@ def branch_and_bound(podcast_data, params, path=[]):
     """
     Recursively perform branch and bound algorithm on possible playlists
     """
-    # Construct current playlist
-    current_playlist = []
-    current_duration = 0
+    # Calculate playlist parameters
+    playlist_params = calculate_playlist_params(path, podcast_data)
 
-    for i in range(len(path)):
-        if not path[i]:
-            continue
-        current_playlist.append(podcast_data[i])
-        current_duration += podcast_data[i]["duration"]
-    
     # Base case: Playlist duration exceeds target duration
-    if current_duration > params["duration"]:
+    if playlist_params["duration"] > params["duration"]:
         return
     
     # Base case: There are no items left, or no more items can be added without exceeding target duration
-    if len(path) >= len(podcast_data) or current_duration + params["duration_min"] > params["duration"]:
+    if playlist_params["next_ranking"] is None or playlist_params["duration"] + params["duration_min"] > params["duration"]:
         
         # Calculate playlist score
-        score = calculate_playlist_score(current_playlist, current_duration, params["duration"])
+        score = calculate_playlist_score(playlist_params, params)
 
         # If playlist score exceeds current best score, update best playlist
         if score > params["best_score"]:
@@ -93,7 +86,7 @@ def branch_and_bound(podcast_data, params, path=[]):
         return
     
     # Calculate optimistic upper bound for current branch
-    upper_bound = calculate_upper_bound(current_playlist, current_duration, path, podcast_data, params)
+    upper_bound = calculate_upper_bound(playlist_params, params)
 
     # If upper bound is below current best score, prune current branch
     if upper_bound < params["best_score"]:
@@ -104,7 +97,33 @@ def branch_and_bound(podcast_data, params, path=[]):
     branch_and_bound(podcast_data, params, path + [False])
 
 
-def calculate_playlist_score(current_playlist, current_duration, duration):
+def calculate_playlist_params(path, podcast_data):
+    """
+    Calculate the necessary variables for evaluating or approximating playlist score
+    """
+    duration = 0
+    ranking_total = 0
+    episode_count = 0
+    series_uuids = set()
+
+    for i in range(len(path)):
+        if not path[i]:
+            continue
+        duration += podcast_data[i]["duration"]
+        ranking_total += podcast_data[i]["ranking"]
+        episode_count += 1
+        series_uuids.add(podcast_data[i]["podcastSeries"]["uuid"])
+    
+    return {
+        "duration": duration,
+        "ranking_total": ranking_total,
+        "episode_count": episode_count,
+        "series_count": len(series_uuids),
+        "next_ranking": None if len(path) == len(podcast_data) else podcast_data[len(path)]["ranking"]
+    }
+
+
+def calculate_playlist_score(playlist_params, params):
     """
     Calculate playlist score for a given playlist
     Diversity score = Number of unique series / Number of episodes
@@ -112,39 +131,36 @@ def calculate_playlist_score(current_playlist, current_duration, duration):
     Playlist score = Average episode ranking * Diversity score * (Duration score)^2
     """
     # If playlist is empty, score = 0
-    if len(current_playlist) == 0:
+    if playlist_params["episode_count"] == 0:
         return 0
     
     # Calculate average episode ranking
-    ranking_score = sum(episode["ranking"] for episode in current_playlist) / len(current_playlist)
+    ranking_score = playlist_params["ranking_total"] / playlist_params["episode_count"]
 
     # Calculate diversity score
-    unique_series_uuids = {episode["podcastSeries"]["uuid"] for episode in current_playlist}
-    diversity_score = len(unique_series_uuids) / len(current_playlist)
+    diversity_score = playlist_params["series_count"] / playlist_params["episode_count"]
 
     # Calculate duration score
-    duration_score = current_duration / duration
+    duration_score = playlist_params["duration"] / params["duration"]
 
     # Calculate playlist score
     return ranking_score * diversity_score * (duration_score * duration_score)
 
 
-def calculate_upper_bound(current_playlist, current_duration, path, podcast_data, params):
+def calculate_upper_bound(playlist_params, params):
     """
     Calculate optimistic upper bound for the current branch
     """
     # Calculate maximum number of remaining episodes
-    max_remaining_episodes = (params["duration"] - current_duration) // params["duration_min"]
+    max_remaining_episodes = (params["duration"] - playlist_params["duration"]) // params["duration_min"]
 
     # Calculate ranking upper bound
     # Ranking upper bound = Average ranking of (episodes in current playlist + next highest-ranking episode)
-    rankings = [episode["ranking"] for episode in current_playlist] + [podcast_data[len(path)]["ranking"]]
-    ranking_bound = sum(rankings) / len(rankings)
+    ranking_bound = (playlist_params["ranking_total"] + playlist_params["next_ranking"]) / (playlist_params["episode_count"] + 1)
 
     # Calculate diversity upper bound
     # Assume that the maximum number of remaining episodes will be added, all of which will be unique
-    current_repeats = len(current_playlist) - len({episode["podcastSeries"]["uuid"] for episode in current_playlist})
-    diversity_bound = (current_repeats + max_remaining_episodes) / (len(current_playlist) + max_remaining_episodes)
+    diversity_bound = (playlist_params["series_count"] + max_remaining_episodes) / (playlist_params["episode_count"] + max_remaining_episodes)
 
     # Set duration upper bound
     # Assume that the full target duration will be reached
