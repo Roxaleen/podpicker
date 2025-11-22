@@ -78,11 +78,9 @@ Below is an overview of the steps:
 
 3. Visualize possible playlist combinations as a binary tree. At each node, consider two possibilities: include the next episode (left branch) or exclude it (right branch).
   
-    a. If a leaf node is reached, compute the score of the playlist combination. If this score exceeds the current global best, update the global best.
-
-    b. If a combination exceeds the target duration, prune the subtree.
-
-    c. Otherwise, compute an *optimistic upper bound* for the highest score that can be achieved in the current subtree. If this upper bound falls below the global best, prune the subtree.
+    * If a leaf node is reached, compute the score of the playlist combination. If this score exceeds the current global best, update the global best.
+    * If a combination exceeds the target duration, prune the subtree.
+    * Otherwise, compute an *optimistic upper bound* for the highest score that can be achieved in the current subtree. If this upper bound falls below the global best, prune the subtree.
 
 4. Return the playlist with the global best score.
 
@@ -94,9 +92,7 @@ However, with tightly calculated upper bounds, the vast majority of these combin
 
 Besides B&B, other algorithms have been considered and deemed unsuitable for this use case:
 
-* Dynamic programming (DP): Combining items to maximize a value (*playlist score*) within a capacity constraint (*duration*) is a classic representation of a knapsack problem.
-
-    However, a knapsack-style DP algorithm is impractical for this use case because the scoring function is not linear.
+* Dynamic programming (DP): Combining items to maximize a value (*playlist score*) within a capacity constraint (*duration*) is a classic representation of a knapsack problem. However, a knapsack-style DP algorithm is impractical for this use case because the scoring function is not linear.
 
 * Greedy: While simple to implement, a greedy algorithm cannot guarantee that the optimal combination will be found. It's also unable to account for all the non-linear score components.
 
