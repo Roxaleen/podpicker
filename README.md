@@ -19,7 +19,7 @@ The created playlist can then be played directly within the app.
 
 The playlist builder and player can be accessed with or without an account.
 
-Logged-in users benefit from greater customization and history features. This includes the ability to review previous playlists, bookmark favorite podcast episodes, and block or follow specific podcast series.
+Logged-in users benefit from greater customization and history features. This includes the ability to review previously created playlists, bookmark favorite podcast episodes, and block or follow specific podcast series.
 
 ## Playlist Builder Algorithm
 
@@ -49,16 +49,16 @@ To account for recency, these ratings are adjusted by subtracting the number of 
 A scoring function is then used to quantify how well a playlist meets the above requirements:
 
 ```
-Score = Average episode rating ×
-        (Unique series count / Episode count) ×
-        (Playlist duration / Target duration)²
+Score = Average episode rating
+        × (Unique series count / Episode count)
+        × (Playlist duration / Target duration)²
 ```
 
 This function is the product of three terms:
 
 * **Rating term:** The first term accounts for the relevance and recency of playlist episodes.
   
-  By using the *average* rather than the *sum* of individual ratings, it prioritizes quality (fewer episodes with higher ratings) over quantity (more numerous episodes, but lower ratings).
+  By using the *average* rather than the *sum* of individual ratings, it prioritizes quality (fewer episodes with higher ratings) over quantity (more numerous episodes, but lower individual ratings).
 
 * **Diversity term:** The second term penalizes combinations with multiple episodes from the same series.
 
@@ -82,7 +82,7 @@ Below is an overview of the steps:
 
 #### Discussion
 
-Theoretically, the number of possible combinations for `n` candidate episodes is `2^n`. By design, each search returns a maximum of 25 episodes, which creates a total of ~33 million combinations.
+Theoretically, the number of possible combinations for `n` candidate episodes is `2ⁿ`. By design, each search returns a maximum of 25 episodes, which creates a total of ~33 million combinations.
 
 However, with tightly calculated upper bounds, the vast majority of these combinations are pruned and never taken into consideration. Pre-sorting the list ensures that the strongest options are considered first, maximizing pruning.
 
@@ -90,7 +90,7 @@ Besides B&B, other algorithms have been considered and deemed unsuitable for thi
 
 * Dynamic programming (DP): Combining items to maximize a value (*playlist score*) within a capacity constraint (*duration*) is a classic representation of a knapsack problem.
 
-  However, a knapsack-style algorithm is not suitable for this use case because the scoring function is not linear.
+  However, a knapsack-style DP algorithm is impractical for this use case because the scoring function is not linear.
 
 * Greedy: While simple to implement, a greedy algorithm cannot guarantee that the optimal combination will be found. It's also unable to account for all the non-linear score components.
 
@@ -108,7 +108,7 @@ A simple greedy algorithm was used for the playlist builder. It only considered 
 
 The current version features multiple enhancements to the UI and the search functionality.
 
-In the playlist builder, the primitive greedy algorithm has been supplanted by the more optimized B&B algorithm.
+In the playlist builder, the primitive greedy algorithm is replaced by the more optimized B&B algorithm.
 
 ## Acknowledgements
 
