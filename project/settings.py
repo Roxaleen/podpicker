@@ -27,9 +27,9 @@ SECRET_KEY = os.getenv("SECRET_KEY", get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = ["podpicker.linhthetinkerer.com", "podpicker.fly.dev", "localhost"]
+ALLOWED_HOSTS = ["podpicker.tinkerer.live", "podpicker.fly.dev", "localhost"]
 
-CSRF_TRUSTED_ORIGINS = ["https://podpicker.linhthetinkerer.com", "https://podpicker.fly.dev"]
+CSRF_TRUSTED_ORIGINS = ["https://podpicker.tinkerer.live", "https://podpicker.fly.dev"]
 
 
 # Application definition

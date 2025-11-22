@@ -1,149 +1,115 @@
-# CS50W Capstone Project: PodPicker
-Video demo: [YouTube](https://youtu.be/qyvniTlhPP4)
+# PodPicker
+Have you ever wished you had something to listen to during a 45-minute commute? Or a 1-hour wait at the laundromat? Or the 30 minutes while you're cleaning, exercising, or doing anything else?
 
-## Overview
+If you answered "yes" to any of the above, then PodPicker is an app for you!
 
-This project is a web application for recommending and building podcast playlists.
+Check out the live demo: [PodPicker](https://podpicker.tinkerer.live)
 
-Users indicate a target total duration, together with optional filters for publication date, languages, genres, or keywords. The app then searches the database and puts together a podcast playlist that matches these requirements.
+## Key Features
 
-The playlist builder and player can be accessed with or without an account. Logged-in users benefit from greater customization and history features.
+PodPicker is a web app with a simple purpose: It handpicks a podcast playlist to occupy and entertain the user for a specified time duration.
 
-## Distinctiveness and Complexity
+### Playlist Configuration
 
-The following elements distinguish this project from others in the course and contribute to its complexity:
+Only a target duration is required to create a playlist. Optionally, users can input specific search terms or filter episodes by publication date, language, or genre.
 
-- **[Backend] Django sessions**: Users can access the basic functionality without creating an account. Playlists created by guests are associated with their session keys and can be migrated to an account should the user decide to register or log in.
-- **[Backend] GraphQL API**: Podcast data are sourced from [Taddy.org](https://taddy.org/developers), which uses a GraphQL API. Dynamic queries are used to perform custom searches based on users' input. The API calls are made via Python's `requests` library.
-- **[Frontend] Object-oriented paradigm**: In the frontend JavaScript, custom classes are used to model podcast series, episodes, and playlists. Each class encapsulates the corresponding item's metadata and user interaction states, together with methods for rendering the DOM components, updating states, and communicating with the backend.
+The created playlist can then be played directly within the app.
 
-Additionally, the app also incorporates:
+### Personalization
 
-- Media playback
-- UI design with automatic light/dark modes
-- Mobile-responsive layout
+The playlist builder and player can be accessed with or without an account.
 
-For a more detailed description of how the project is designed and implemented, and specific decisions made or actions taken during that process, please refer to the [Implementation](#implementation) section below.
+Logged-in users benefit from greater customization and history features. This includes the ability to review previous playlists, bookmark favorite podcast episodes, and block or follow specific podcast series.
 
-## How to Run
+## Playlist Builder Algorithm
 
-1. **Install requirements**: This project uses Django and the `requests` library.
+At the core of PodPicker is the algorithm for building a playlist from available podcast episodes.
 
-        pip install -r requirements.txt
+### Requirements
 
-2. **Obtain Taddy API key**: An API key is needed to access the Taddy podcast API. [Create a free account](https://taddy.org/developers) to obtain an API key, and then export it in the terminal.
+The optimal playlist should meet following expectations:
 
-        export X_USER_ID=your_user_id
-        export X_API_KEY=your_api_key
+* **Relevance:** Episodes most relevant to the search query should be prioritized.
+* **Recency:** More recently published episodes should be prioritized.
+* **Diversity:** The playlist should include episodes across different podcast series. Multiple episodes from the same series should only be included if better alternatives are unavailable.
+* **Duration:** The overall playlist duration should be as close as possible to the target duration, without exceeding it.
 
-    Please note that this is required for the podcast search feature. If you attempt to use the app without an API key, you'll encounter an error page when performing a search.
+### Implementation
 
-3. **Apply migrations**
+#### Episode Ratings
 
-        python manage.py migrate
+The podcast service provider ([Taddy.org](https://taddy.org/developers/podcast-api)) provides a relevance rating for every search result, as an integer between 0 and 100.
 
-4. **Run server**: The app can now be run using the standard Django command.
+To account for recency, these ratings are adjusted by subtracting the number of months since publication (capped at 20).
 
-        python manage.py runserver
+> *Example:* An episode that has a relevance rating of 100 and was published 10 months ago will have an adjusted rating of `100 - 10 = 90`.
 
+#### Playlist Scores
 
-## Implementation
+A scoring function is then used to quantify how well a playlist meets the above requirements:
 
-### [Backend] Python - Django
+```
+Score = Average episode rating ×
+        (Unique series count / Episode count) ×
+        (Playlist duration / Target duration)²
+```
 
-The directory contains a Django project with a single app (`podpicker`).
+This function is the product of three terms:
 
-As in other standard Django projects, the app directory contains the following Python scripts:
+* **Rating term:** The first term accounts for the relevance and recency of playlist episodes.
+  
+  By using the *average* rather than the *sum* of individual ratings, it prioritizes quality (fewer episodes with higher ratings) over quantity (more numerous episodes, but lower ratings).
 
-- **Routes and views**: As in other standard Django projects, the routes are defined in `urls.py`, and the views in `views.py`.
+* **Diversity term:** The second term penalizes combinations with multiple episodes from the same series.
 
-- **Models**: The models are defined in `models.py`. There are four models:
+* **Duration term:** The third term measures how close the overall playlist duration is to the target duration.
 
-    - `User` (which extends Django's `AbstractUser`)
-    - `PodcastSeries`
-    - `PodcastEpisode`
-    - `Playlist`
+  This term is *squared* so that playlists far below the target duration are penalized much more severely than those closer to it.
 
-    Some custom model methods have been added to assist with data retrieval.
+#### Algorithm
 
-### [Backend] Python - Extra
+A **branch-and-bound (B&B)** algorithm is used to determine the playlist with the highest score.
 
-Additional helper functions are defined in `utils.py`.
+Below is an overview of the steps:
 
-- **Fetching and processing API data**: The first function, `get_podcasts`, performs the following tasks:
+1. Pre-sort the list of available episodes by their adjusted ratings.
+2. Visualize possible playlist combinations as a binary tree. At each node, consider two possibilities: include the next episode (left branch) or exclude it (right branch).
+3. Maintain a *global best* of the highest score found so far.
+4. If a leaf node is reached, compute the score of the playlist combination. If this score exceeds the current global best, update the global best. 
+5. If a combination exceeds the target duration, prune the subtree.
+6. Otherwise, compute an *optimistic upper bound* for the highest score that can be achieved in the current subtree. If this upper bound falls below the global best, prune the subtree.
+7. Return the playlist with the global best score.
 
-    - Construct a GraphQL query based on user input
-    - Call the API
-    - Check the returned data and discard any items that don't match requirements
+#### Discussion
 
-    For each of the resulting items, a copy of the received metadata is saved in the `PodcastSeries` and `PodcastEpisode` models. This is to avoid unnecessary API calls when the same information is needed again later on (e.g., to render a profile history page). Server-side storage of API data is explicitly permitted on Taddy's website.
+Theoretically, the number of possible combinations for `n` candidate episodes is `2^n`. By design, each search returns a maximum of 25 episodes, which creates a total of ~33 million combinations.
 
-- **Building podcast playlists**: The `pick_podcasts` function selects items from the resulting list to create a playlist with the desired total duration.
+However, with tightly calculated upper bounds, the vast majority of these combinations are pruned and never taken into consideration. Pre-sorting the list ensures that the strongest options are considered first, maximizing pruning.
 
-    A simple greedy algorithm is used in combination with a random shuffle. This ensures that different playlists can be generated from similar sets of search results (which are likely to occur when the same search query is performed multiple times in a short time span).
+Besides B&B, other algorithms have been considered and deemed unsuitable for this use case:
 
-### [Frontend] HTML, CSS, JavaScript
+* Dynamic programming (DP): Combining items to maximize a value (*playlist score*) within a capacity constraint (*duration*) is a classic representation of a knapsack problem.
 
-#### Base components
+  However, a knapsack-style algorithm is not suitable for this use case because the scoring function is not linear.
 
-The base elements and components that appear throughout the app are grouped into the following files.
+* Greedy: While simple to implement, a greedy algorithm cannot guarantee that the optimal combination will be found. It's also unable to account for all the non-linear score components.
 
-- **JavaScript**: The `utils.js` file defines the core variables and classes that are used throughout the app.
+## Version History
 
-    - **`PodcastSeries`**: Custom class for podcast series, including methods for:
-        - Rendering and updating DOM elements
-        - Generating a dialog for displaying detailed descriptions
-        - Handling follow and block actions (via `fetch` requests to the backend)
+PodPicker was initially created as the final project for the [Web Programming with Python and JavaScript (CS50W)
+](https://cs50.harvard.edu/web/) course by HarvardX.
 
-    - **`PodcastEpisode`**: Custom class for podcast episodes, including methods for:
-        - Rendering and updating DOM elements
-        - Generating a dialog for displaying detailed descriptions
-        - Handling finish and bookmark actions (via `fetch` requests to the backend)
+### Version 0
+This is the version initially submitted as the final project for CS50W. It incorporated the core app features, such as search, playback, and personalized history filters.
 
-    - **`Playlist`**: Custom class for podcast playlists
+A simple greedy algorithm was used for the playlist builder. It only considered the playlist duration, without accounting for relevance, recency, or diversity.
 
-    - Some utility functions for generating duration strings and processing language and genre field values
+### Version 1 (Current)
 
-- **HTML**: Besides the base layout, the `layout.html` template also contains templates for:
+The current version features multiple enhancements to the UI and the search functionality.
 
-    - DOM elements for podcast series, episodes, and playlists
+In the playlist builder, the primitive greedy algorithm has been supplanted by the more optimized B&B algorithm.
 
-    - Dialog windows for displaying more detailed metadata and descriptions.
+## Acknowledgements
 
-    These are contained within HTML `<template>` elements, which are not rendered by the browser but can be cloned and inserted via JavaScript when needed.
-
-- **CSS**: The base styles for the app and its reusable components are defined in `global.css`.
-
-#### Individual app functions
-
-The remaining HTML, CSS, and JavaScript files serve to facilitate individual functionalities within the app.
-
-- **Search**: The podcast search page doubles as the homepage for the app.
-
-    The `picker-form.js` script populates the filter options and handles UI feedback when certain options are selected.
-
-    The structure of the search page is defined in the `picker-form.html` template. Styles specific to this page are declared in `picker-form.css`.
-
-- **Playlist building**: After submitting a search form, users will be shown a result page with the recommended playlist. They can customize the playlist by adding or removing items to their liking.
-
-    The recommended playlist and a collection of alternative options are generated by the backend. The raw metadata is then injected into the template using the `json_script` template filter.
-
-    The `picker-selection.js` script picks up the injected data and generates the corresponding DOM components. It also handles the actions of adding or removing items to/from the playlist by the user.
-
-    `picker-selection.html` is the HTML template for this page. Styles specific to this page are declared in `picker-selection.css`.
-
-- **Podcast player**: After creating a playlist, users are taken to a page where they can listen to the playlist.
-
-    Again, the metadata for playback items are injected by the backend into the HTML template. The `player.js` script then retrieves the data and renders the DOM elements accordingly. It also contains functionality for basic playback toggles (play, pause, and skipping to other items in the playlist).
-
-    The HTML template for this page is `player.html`, with page-specific styles declared in `player.css`.
-
-- **Profile pages**: Logged-in users have access to a profile page that displays all playlists they've created. They can also browse lists of episodes they've finished listening to, episodes they've bookmarked, series they're following, and series they've blocked.
-
-    Only a bare template is initially rendered when the page loads. The `profile.js` script then makes an asynchronous request to the backend to retrieve some data to populate the page.
-
-    The profile pages use an infinite scrolling mechanism: when a user scrolls to the bottom of a page, an asynchronous JavaScript request is sent to the backend for more data to extend the list. This continues until there are no items left to show.
-
-    The five separate profile pages (to display five different types of lists) all share the same template file, `profile.html`. Profile-specific styles are declared in `profile.css`.
-
-- **Miscellaneous**: As their names suggest, `login.html`, `register.html`, and `error.html` are templates for user login/registration and error pages. Their styles are contained in `admin.css`.
+PodPicker is built on the podcast database and podcast search engine provided by [Taddy.org](https://taddy.org/developers/podcast-api).
