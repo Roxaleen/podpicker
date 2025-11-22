@@ -58,27 +58,33 @@ This function is the product of three terms:
 
 * **Rating term:** The first term accounts for the relevance and recency of playlist episodes.
   
-  By using the *average* rather than the *sum* of individual ratings, it prioritizes quality (fewer episodes with higher ratings) over quantity (more numerous episodes, but lower individual ratings).
+    By using the *average* rather than the *sum* of individual ratings, it prioritizes quality (fewer episodes with higher ratings) over quantity (more numerous episodes, but lower individual ratings).
 
 * **Diversity term:** The second term penalizes combinations with multiple episodes from the same series.
 
 * **Duration term:** The third term measures how close the overall playlist duration is to the target duration.
 
-  This term is *squared* so that playlists far below the target duration are penalized much more severely than those closer to it.
+    This term is *squared* so that playlists far below the target duration are penalized much more severely than those closer to it.
 
 #### Algorithm
 
-A **branch-and-bound (B&B)** algorithm is used to determine the playlist with the highest score.
+A recursive **branch-and-bound (B&B)** algorithm is used to determine the playlist with the highest score.
 
 Below is an overview of the steps:
 
 1. Pre-sort the list of available episodes by their adjusted ratings.
-2. Visualize possible playlist combinations as a binary tree. At each node, consider two possibilities: include the next episode (left branch) or exclude it (right branch).
-3. Maintain a *global best* of the highest score found so far.
-4. If a leaf node is reached, compute the score of the playlist combination. If this score exceeds the current global best, update the global best. 
-5. If a combination exceeds the target duration, prune the subtree.
-6. Otherwise, compute an *optimistic upper bound* for the highest score that can be achieved in the current subtree. If this upper bound falls below the global best, prune the subtree.
-7. Return the playlist with the global best score.
+
+2. Maintain a *global best* of the highest score found so far.
+
+3. Visualize possible playlist combinations as a binary tree. At each node, consider two possibilities: include the next episode (left branch) or exclude it (right branch).
+  
+    a. If a leaf node is reached, compute the score of the playlist combination. If this score exceeds the current global best, update the global best.
+
+    b. If a combination exceeds the target duration, prune the subtree.
+
+    c. Otherwise, compute an *optimistic upper bound* for the highest score that can be achieved in the current subtree. If this upper bound falls below the global best, prune the subtree.
+
+4. Return the playlist with the global best score.
 
 #### Discussion
 
@@ -90,7 +96,7 @@ Besides B&B, other algorithms have been considered and deemed unsuitable for thi
 
 * Dynamic programming (DP): Combining items to maximize a value (*playlist score*) within a capacity constraint (*duration*) is a classic representation of a knapsack problem.
 
-  However, a knapsack-style DP algorithm is impractical for this use case because the scoring function is not linear.
+    However, a knapsack-style DP algorithm is impractical for this use case because the scoring function is not linear.
 
 * Greedy: While simple to implement, a greedy algorithm cannot guarantee that the optimal combination will be found. It's also unable to account for all the non-linear score components.
 
