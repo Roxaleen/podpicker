@@ -16,9 +16,9 @@ DURATION_DIVISOR_MAX = 6 # Find episodes of at least 1/6 the desired playlist du
 # HTML sanitizer
 # Documentation: https://nh3.readthedocs.io/
 nh3_cleaner = nh3.Cleaner(
-    tags=set(["p", "br", "hr", "strong", "em", "b", "i", "u", "a"]),
+    tags={"p", "br", "hr", "strong", "em", "b", "i", "u", "a"},
     attributes={
-        "a": set(["href"])
+        "a": {"href"}
     },
     set_tag_attribute_values={
         "a": {
@@ -90,10 +90,17 @@ def get_podcasts(request):
         if len(new_data) == 0 or not has_next:
             break
     
+    # If no episodes found, return error
+    if len(podcast_data) == 0:
+        return {"error": {
+            "error_heading": "No podcasts found",
+            "error_body": "No matching episodes could be found. Please expand your query and try again."
+        }}
+    
     # Insert search rankings
     for episode in podcast_data:
         episode["ranking"] = rankings[str(episode["uuid"])]
-
+    
     # Process received data
     return {
         "data": podcast_data,

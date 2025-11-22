@@ -30,7 +30,7 @@ class User(AbstractUser):
 
 class PodcastSeries(models.Model):
     uuid = models.UUIDField(primary_key=True, editable=False)
-    hash = models.CharField()
+    hash = models.CharField(null=True)
     title = models.CharField()
     description = models.TextField()
     imageUrl = models.URLField(null=True)
@@ -64,7 +64,7 @@ class PodcastSeries(models.Model):
 
 class PodcastEpisode(models.Model):
     uuid = models.UUIDField(primary_key=True, editable=False)
-    hash = models.CharField()
+    hash = models.CharField(null=True)
     title = models.CharField()
     description = models.TextField()
     duration = models.IntegerField()

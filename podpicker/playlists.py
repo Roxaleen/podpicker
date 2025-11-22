@@ -28,14 +28,16 @@ def build_playlist(podcast_data, duration):
     branch_and_bound(podcast_data, params)
 
     # Construct best playlist
+    # Start from back of list to avoid shifting indices when items are removed from list
     playlist_data = []
     best_path = params["best_path"]
-    for i in range(len(best_path)):
+    for i in reversed(range(len(best_path))):
         if not best_path[i]:
             continue
         else:
             # Move episode to playlist
             playlist_data.append(podcast_data.pop(i))
+    playlist_data.reverse()
 
     # Re-sort remaining episodes by series
     podcast_data.sort(key=lambda episode: str(episode["podcastSeries"]["uuid"]))
@@ -73,6 +75,10 @@ def branch_and_bound(podcast_data, params, path=[]):
         current_playlist.append(podcast_data[i])
         current_duration += podcast_data[i]["duration"]
     
+    # Base case: Playlist duration exceeds target duration
+    if current_duration > params["duration"]:
+        return
+    
     # Base case: There are no items left, or no more items can be added without exceeding target duration
     if len(path) >= len(podcast_data) or current_duration + params["duration_min"] > params["duration"]:
         
@@ -103,10 +109,10 @@ def calculate_playlist_score(current_playlist, current_duration, duration):
     Calculate playlist score for a given playlist
     Diversity score = Number of unique series / Number of episodes
     Duration score = Playlist duration / Target duration
-    Playlist score = Average episode ranking * Diversity score * Duration score
+    Playlist score = Average episode ranking * Diversity score * (Duration score)^2
     """
-    # If playlist is empty or exceeds target duration, return 0
-    if len(current_playlist) == 0 or current_duration > duration:
+    # If playlist is empty, score = 0
+    if len(current_playlist) == 0:
         return 0
     
     # Calculate average episode ranking
@@ -120,7 +126,7 @@ def calculate_playlist_score(current_playlist, current_duration, duration):
     duration_score = current_duration / duration
 
     # Calculate playlist score
-    return ranking_score * diversity_score * duration_score
+    return ranking_score * diversity_score * (duration_score * duration_score)
 
 
 def calculate_upper_bound(current_playlist, current_duration, path, podcast_data, params):
@@ -145,4 +151,4 @@ def calculate_upper_bound(current_playlist, current_duration, path, podcast_data
     duration_bound = 1
 
     # Calculate playlist score
-    return ranking_bound * diversity_bound * duration_bound
+    return ranking_bound * diversity_bound * (duration_bound * duration_bound)
