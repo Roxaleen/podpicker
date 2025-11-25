@@ -52,15 +52,9 @@ Score = Average episode rating
 
 This function is the product of three terms:
 
-* **Rating term:** The first term accounts for the relevance and recency of playlist episodes.
-  
-    By using the *average* rather than the *sum* of individual ratings, it prioritizes quality (fewer episodes with higher ratings) over quantity (a lot of episodes, but lower individual ratings).
-
+* **Rating term:** The first term accounts for the relevance and recency of playlist episodes. By using the *average* rather than the *sum* of individual ratings, it prioritizes quality (fewer episodes with higher ratings) over quantity (more numerous episodes, but lower individual ratings).
 * **Diversity term:** The second term penalizes combinations with multiple episodes from the same series.
-
-* **Duration term:** The third term measures how close the overall playlist duration is to the target duration.
-
-    This term is *squared* so that playlists far below the target duration are penalized much more severely than those closer to it.
+* **Duration term:** The third term measures how close the overall playlist duration is to the target duration. This term is *squared* so that playlists far below the target duration are penalized much more severely than those closer to it.
 
 #### Algorithm
 
@@ -80,7 +74,7 @@ Below is an overview of the steps:
 
 4. Return the playlist with the global best score.
 
-#### Discussion
+### Discussion
 
 Theoretically, the number of possible combinations for `n` candidate episodes is `2ⁿ`. By design, each search returns a maximum of 25 episodes, which creates a total of ~33 million combinations.
 
@@ -88,9 +82,9 @@ However, with tightly calculated upper bounds, the vast majority of these combin
 
 Besides B&B, other algorithms have been considered and deemed unsuitable for this use case:
 
-* **Dynamic programming (DP):** Combining items to maximize a value (*playlist score*) within a capacity constraint (*duration*) is a classic representation of a knapsack problem. However, a knapsack-style DP algorithm is impractical for this use case because the scoring function is not linear.
+* **Dynamic programming (DP)**: Combining items to maximize a value (*playlist score*) within a capacity constraint (*duration*) is a classic representation of a knapsack problem. However, a knapsack-style DP algorithm is impractical for this use case because the scoring function is not linear.
 
-* **Greedy:** While simple to implement, a greedy algorithm cannot guarantee that the optimal combination will be found. It's also unable to account for all the non-linear score components.
+* **Greedy**: While simple to implement, a greedy algorithm cannot guarantee that the optimal combination will be found. It's also unable to account for all the non-linear score components.
 
 ## Version History
 
