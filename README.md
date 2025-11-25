@@ -9,17 +9,13 @@ Check out the live demo: [PodPicker](https://podpicker.tinkerer.live)
 
 PodPicker is a web app with a simple purpose: It handpicks a podcast playlist to occupy and entertain the user for a specified time duration.
 
-### Playlist Configuration
+* **Playlist configuration:** Only a target duration is required to create a playlist. Optionally, users can input specific search terms or filter episodes by publication date, language, or genre.
 
-Only a target duration is required to create a playlist. Optionally, users can input specific search terms or filter episodes by publication date, language, or genre.
+    The created playlist can then be played directly within the app.
 
-The created playlist can then be played directly within the app.
+* **Personalization:** The playlist builder and player can be accessed with or without an account.
 
-### Personalization
-
-The playlist builder and player can be accessed with or without an account.
-
-Logged-in users benefit from greater customization and history features. This includes the ability to review previously created playlists, bookmark favorite podcast episodes, and block or follow specific podcast series.
+    Logged-in users benefit from greater customization and history features. This includes the ability to review previously created playlists, bookmark favorite podcast episodes, and block or follow specific podcast series.
 
 ## Playlist Builder Algorithm
 
@@ -58,7 +54,7 @@ This function is the product of three terms:
 
 * **Rating term:** The first term accounts for the relevance and recency of playlist episodes.
   
-    By using the *average* rather than the *sum* of individual ratings, it prioritizes quality (fewer episodes with higher ratings) over quantity (more numerous episodes, but lower individual ratings).
+    By using the *average* rather than the *sum* of individual ratings, it prioritizes quality (fewer episodes with higher ratings) over quantity (a lot of episodes, but lower individual ratings).
 
 * **Diversity term:** The second term penalizes combinations with multiple episodes from the same series.
 
@@ -92,26 +88,22 @@ However, with tightly calculated upper bounds, the vast majority of these combin
 
 Besides B&B, other algorithms have been considered and deemed unsuitable for this use case:
 
-* Dynamic programming (DP): Combining items to maximize a value (*playlist score*) within a capacity constraint (*duration*) is a classic representation of a knapsack problem. However, a knapsack-style DP algorithm is impractical for this use case because the scoring function is not linear.
+* **Dynamic programming (DP):** Combining items to maximize a value (*playlist score*) within a capacity constraint (*duration*) is a classic representation of a knapsack problem. However, a knapsack-style DP algorithm is impractical for this use case because the scoring function is not linear.
 
-* Greedy: While simple to implement, a greedy algorithm cannot guarantee that the optimal combination will be found. It's also unable to account for all the non-linear score components.
+* **Greedy:** While simple to implement, a greedy algorithm cannot guarantee that the optimal combination will be found. It's also unable to account for all the non-linear score components.
 
 ## Version History
 
-PodPicker was initially created as the final project for the [Web Programming with Python and JavaScript (CS50W)
-](https://cs50.harvard.edu/web/) course by HarvardX.
+PodPicker was initially created as the final project for the [Web Programming with Python and JavaScript (CS50W)](https://cs50.harvard.edu/web/) course by HarvardX.
 
-### Version 0
-This is the version initially submitted as the final project for CS50W. It incorporated the core app features, such as search, playback, and personalized history filters.
+* **[v1 (current)](https://github.com/Roxaleen/podpicker/releases/tag/v1):** The current version features multiple enhancements to the UI and the search functionality.
 
-A simple greedy algorithm was used for the playlist builder. It only considered the playlist duration, without accounting for relevance, recency, or diversity.
+    In the playlist builder, the primitive greedy algorithm is replaced by the more optimized B&B algorithm.
 
-### Version 1 (Current)
+* **[v0](https://github.com/Roxaleen/podpicker/releases/tag/v0):** This is the version initially submitted as the final project for CS50W. It incorporated the core app features, such as search, playback, and personalized history filters.
 
-The current version features multiple enhancements to the UI and the search functionality.
-
-In the playlist builder, the primitive greedy algorithm is replaced by the more optimized B&B algorithm.
+    A simple greedy algorithm was used for the playlist builder. It only considered the playlist duration, without accounting for relevance, recency, or diversity.
 
 ## Acknowledgements
 
-PodPicker is built on the podcast database and podcast search engine provided by [Taddy.org](https://taddy.org/developers/podcast-api).
+PodPicker relies on the podcast database and podcast search engine provided by [Taddy.org](https://taddy.org/developers/podcast-api).
