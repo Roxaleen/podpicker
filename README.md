@@ -7,7 +7,7 @@ Check out the live demo: [PodPicker](https://podpicker.tinkerer.live)
 
 ## Key Features
 
-PodPicker is a web app with a simple purpose: It handpicks a podcast playlist to occupy and entertain the user for a specified time duration.
+PodPicker is a web app with a simple purpose: It handpicks a podcast playlist that matches a specified time duration.
 
 * **Playlist configuration:** Only a target duration is required to create a playlist. Optionally, users can input specific search terms or filter episodes by publication date, language, or genre.
 
