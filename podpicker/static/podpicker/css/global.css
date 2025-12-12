@@ -230,13 +230,6 @@ body {
     margin: 0;
 }
 
-.site-footer .icon-before::before {
-    font-variation-settings: "GRAD" -25, "opsz" 40;
-    margin-right: 0.375em;
-    scale: 1.25;
-    translate: 0 12%;
-}
-
 .page-section {
     padding: var(--padding-y) var(--padding-x);
 }

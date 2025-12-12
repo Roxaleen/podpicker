@@ -110,7 +110,7 @@ class Playlist(models.Model):
             )]
 
     def __str__(self):
-        return f"Playlist ({self.episodes.count()} items) by {self.user.username}"
+        return f"Playlist ({self.episodes.count()} items) by {self.user.username if self.user else "Guest"}"
 
     # Get info for all episodes in list format
     def get_metadata_list(self, user):
